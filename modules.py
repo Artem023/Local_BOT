@@ -22,6 +22,7 @@ def creat_data_table():
 
 # _____________________________________________________________________________#
 
+# Добавляем новый контакт
 def add_contact():
     db = sqlite3.connect("contacts.db")
     cur = db.cursor()
@@ -80,7 +81,7 @@ def add_contact():
         finally:
             cur.close()
             db.close()
-    # ЧТО-ТО ЛОМАЕТСЯ
+
     if cmd == 3:
         name = input("Имя: ").title()
         surname = input("Фамилия: ").title()
@@ -108,6 +109,8 @@ def add_contact():
 
 # _____________________________________________________________________________#
 
+# Показать все контакты
+
 
 def show_all_contacts():
     db = sqlite3.connect("contacts.db")
@@ -120,7 +123,7 @@ def show_all_contacts():
             if i is None:
                 print(" ")
             else:
-                print(f"\n{i[1]} {i[2]}: {i[3]} \n{i[4]}")
+                print(f"\n{i[1]} {i[2]}: {i[3]} {i[4]} \n{i[5]}")
 
     except sqlite3.Error as err:
         print(f"ERROR {err}")
@@ -130,6 +133,8 @@ def show_all_contacts():
         db.close()
 
 # _____________________________________________________________________________#
+
+# Найти контакт
 
 
 def find_contact():
@@ -190,33 +195,152 @@ def find_contact():
             cur.close()
             db.close()
 
-
 # _____________________________________________________________________________#
-'''
+
+# Изменить контакт
+
+
 def edit_contacts():
-  print("""
+    db = sqlite3.connect("contacts.db")
+    cur = db.cursor()
+
+    print("""
 Что вы хотите отредактировать (введите номер команды)?
-1 - изменить имя
-2 - изменить фамилию
-3 - изменить 1-ый номер телефона
-4 - изменить 2-ой номер телефона
+1 - изменить имя и фамилию
+2 - изменить 1-ый номер телефона
+3 - изменить 2-ой номер телефона
+4 - изменить email
   """)
 
-  cmd = int(input("> "))
+    action = int(input("> "))
 
-  if cmd == 1:
     name = input("Имя: ").title()
     surname = input("Фамилия: ").title()
+    number = input("Номер телефона: ")
+    value = [name, surname, number]
 
     try:
-      cur.execute("SELECT * FROM contacts WHERE name = ? OR surname = ?",(name, surname))
+        cur.execute(
+            "SELECT * FROM contacts WHERE (name = ? OR surname = ?) AND number1 = ?", (name, surname, number))
 
-      if cur.fetchone() is None:
-        print("Такого номера нет в списке! \nХотите добавить новый (введите да / нет)? ")
-        cmd = input("> ").lower()
-        if cmd == "да":
-          add_contact()
-      else:
-        for i in cur.execute("SELECT * FROM contacts WHERE name = ? OR surname = ?",(name, surname)):
-          print(f"{i[1]} {i[2]}: {i[3]} \n{i[4]}")'''
-    
+        if cur.fetchone() is None:
+            print(
+                "Такого номера нет в списке! \nХотите добавить новый (введите да / нет)? ")
+            cmd = input("> ").lower()
+            if cmd == "да":
+                add_contact()
+        else:
+            if action == 1:
+                for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                    print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                print("Это то, что вы искали (введите да / нет)?")
+                cmd = input("> ").lower()
+                if cmd == "нет":
+                    print("Попробуйте заново!")
+                elif cmd == "да":
+                    new_name = input("Введите отредактированное имя: ").title()
+                    new_surname = input(
+                        "Введите отредактированнe. фамилию: ").title()
+                    cur.execute(
+                        f"UPDATE contacts SET name = '{new_name}', surname = '{new_surname}' WHERE number1 = {number}")
+                    for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                        print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                        print("Имя и фамилия успешно изменены")
+                    db.commit()
+
+            elif action == 2:
+                for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                    print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                print("Это то, что вы искали (введите да / нет)?")
+                cmd = input("> ").lower()
+                if cmd == "нет":
+                    print("Попробуйте заново!")
+                elif cmd == "да":
+                    new_number1 = input("Введите отредактированный номер: ")
+                    cur.execute(
+                        f"UPDATE contacts SET number1 = '{new_number1}' WHERE number1 = {number}")
+                    for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                        print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                        print("Номер успешно изменен")
+                    db.commit()
+
+            elif action == 3:
+                for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                    print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                print("Это то, что вы искали (введите да / нет)?")
+                cmd = input("> ").lower()
+                if cmd == "нет":
+                    print("Попробуйте заново!")
+                elif cmd == "да":
+                    new_number2 = input("Введите отредактированный номер: ")
+                    cur.execute(
+                        f"UPDATE contacts SET number2 = '{new_number2}' WHERE number1 = {number}")
+                    for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                        print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                        print("Номер успешно изменен")
+                    db.commit()
+
+            elif action == 4:
+                for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                    print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                print("Это то, что вы искали (введите да / нет)?")
+                cmd = input("> ").lower()
+                if cmd == "нет":
+                    print("Попробуйте заново!")
+                elif cmd == "да":
+                    new_email = input("Введите отредактированный номер: ")
+                    cur.execute(
+                        f"UPDATE contacts SET email = '{new_email}' WHERE number1 = {number}")
+                    for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                        print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+                        print("Email успешно изменен")
+                    db.commit()
+
+    except sqlite3.Error as err:
+        print(f"ERROR {err}")
+
+    finally:
+        cur.close()
+        db.close()
+
+# _____________________________________________________________________________#
+
+def delete_contact():
+    db = sqlite3.connect("contacts.db")
+    cur = db.cursor()
+
+    print("Введите данные для удаления контакта.")
+    name = input("Имя: ")
+    surname = input("Фамилия: ")
+    number = input("Номер телефона: ")
+
+    try:
+        cur.execute(
+            "SELECT * FROM contacts WHERE (name = ? OR surname = ?) AND number1 = ?", (name, surname, number))
+        if cur.fetchone() is None:
+            print("Такого контакта не существует. \nХотите его добавить (введите да / нет?")
+            cmd = input("> ").lower()
+            if cmd == "да":
+                add_contact()
+            else:
+                print("Введите данные еще раз.")
+
+        else:
+            for i in cur.execute(f"SELECT * FROM contacts WHERE number1 = {number}"):
+                print(f"{i[1]} {i[2]}: {i[3]}, {i[4]}, {i[5]}")
+
+            print("Это то, что вы искали (введите да / нет)?")
+            cmd = input("> ").lower()
+            if cmd == "нет":
+                print("Попробуйте заново!")
+            elif cmd == "да":
+                cur.execute(f"DELETE FROM contacts WHERE number1 = {number}")
+                print("Номер успешно удален")
+            db.commit()
+
+    except sqlite3.Error as err:
+        print(f"ERROR {err}")
+
+    finally:
+        cur.close()
+        db.close()
